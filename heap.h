@@ -73,5 +73,7 @@ struct MinHeap {
                 index = smaller;
             }
         }
+
+        return min_elem;
     }
 };
