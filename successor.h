@@ -45,6 +45,14 @@ struct KineticSuccessor {
         items = sort(items.begin(), items.end());
 
         for (int i = 0; i < items.size() - 1; i++) {
+            /*
+
+            TODO
+
+            IMPORTANT: WHEN INSERTING CERTIFICATES CHECK TO SEE IF WE'VE ALREADY CROSSED
+            IF YES, DON'T INSERT
+            */
+
             auto cert = getCertificate(items[i], items[i + 1]);
             certificates.insert(getCertificate(items[i], items[i + 1]));
         }
@@ -80,7 +88,7 @@ struct KineticSuccessor {
             /*
 
             TODO
-            
+
             IMPORTANT: WHEN INSERTING CERTIFICATES CHECK TO SEE IF WE'VE ALREADY CROSSED
             IF YES, DON'T INSERT
             */
