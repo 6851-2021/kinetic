@@ -11,17 +11,27 @@ struct MovingObject {
     int *curtime;
     T value;
 
+    // Constructor used as the default constructor for the kinetic heap
+    MovingObject() {}
+
+    // Constructor used for kinetic heap, since
+    // `curtime` is assigned at construction there
+    MovingObject(int ip, int v, T val) : initialPosition(ip), velocity(v), curtime(nullptr), value(val) {}
+
     MovingObject(int ip, int v, int *t, T val) : initialPosition(ip), velocity(v), curtime(t), value(val) {}
 
-    double getIntersectionTime(const MovingObject &other) {
+    double getIntersectionTime(const MovingObject &other) const {
+        // Avoid returning NaN when both numerator and denominator are 0
+        if (velocity - other.velocity == 0)
+            return -std::numeric_limits<double>::infinity();
         return (other.initialPosition - initialPosition * 1.0) / (velocity - other.velocity);
     }
 
-    double getPosition() {
+    double getPosition() const {
         return initialPosition + velocity * (*curtime);
     }
 
-    bool operator<(const MovingObject &other) {
+    bool operator<(const MovingObject &other) const {
         return getPosition() < other.getPosition();
     }
 };

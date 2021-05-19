@@ -1,9 +1,11 @@
 #include <vector>
 #include <utility>
 #include <optional>
+#include <ostream>
+#include <iostream>
 #include "successor.h"
 
-template<typename T, bool Standalone = false>
+template<typename T, typename Ref, bool Standalone = false>
 struct MinHeap {
     struct Element {
         T t;
@@ -15,10 +17,10 @@ struct MinHeap {
 
     std::vector<Element> vec;
     // The structure to reference.
-    MinHeap<T, Standalone>* ref;
+    MinHeap<Ref, T, Standalone>* ref;
 
     // Add element to simplify parent-child math
-    MinHeap(MinHeap<T, Standalone>* ref_) : vec(1), ref(ref_) {}
+    MinHeap(MinHeap<Ref, T, Standalone>* ref_) : vec(1), ref(ref_) {}
 
     static constexpr size_t root() {
         return 1;
@@ -41,11 +43,11 @@ struct MinHeap {
     }
 
     // Gets the minimum element if it exists
-    std::optional<T> min() {
+    std::optional<T> min() const {
         return vec.size() > root() ? std::make_optional(vec[root()].t) : std::nullopt;
     }
 
-    std::optional<size_t> min_ref_index() {
+    std::optional<size_t> min_ref_index() const {
         return vec.size() > root() ? std::make_optional(vec[root()].ref_index) : std::nullopt;
     }
 
@@ -59,7 +61,7 @@ struct MinHeap {
     }
 
     // Gets the ref_index of element i, assuming i != 0
-    size_t ref_index(size_t i) {
+    size_t ref_index(size_t i) const {
         return vec[i].ref_index;
     }
 
@@ -114,8 +116,8 @@ struct MinHeap {
     void remove(size_t i) {
         if (i != 0) {
             if constexpr (!Standalone) {
-                ref->set_ref_index(vec[i].ref_index, 0); // Untrack this
                 ref->set_ref_index(vec[vec.size() - 1].ref_index, i);
+                ref->set_ref_index(vec[i].ref_index, 0); // Untrack this
             }
             vec[i] = vec[vec.size() - 1];
             vec.pop_back();
@@ -140,27 +142,27 @@ struct MinHeap {
 
 template<typename T>
 struct KineticHeap {
-    MinHeap<MovingObject<T>> items;
+    MinHeap<MovingObject<T>, double> items;
     // Each node (except the root) has a certificate comparing it to its parent.
-    MinHeap<double> certificates;
+    MinHeap<double, MovingObject<T>> certificates;
     int time;
 
     KineticHeap(std::vector<MovingObject<T>> items_) : items(&certificates), certificates(&items), time(0) {
         for (MovingObject<T> item_ : items_) {
-            item_.time = &time;
+            item_.curtime = &time;
             items.add(item_, 0);
         }
 
         for (size_t i = items.left(items.root()); i < items.vec.size(); ++i) {
-            maybeAddCertificate(i);
+            maybeAddCertificate(i, time);
         }
     }
 
     // Potentially add a certificate comparing element i and its parent.
     // No certificate gets added if they're moving away from each other.
-    void maybeAddCertificate(size_t i) {
-        MovingObject<T>& item = items[i];
-        MovingObject<T>& parent = items[items.parent(i)];
+    void maybeAddCertificate(size_t i, double time) {
+        MovingObject<T>& item = items.vec[i].t;
+        MovingObject<T>& parent = items.vec[items.parent(i)].t;
         double intersection = item.getIntersectionTime(parent);
         if (intersection > time || intersection == time && item.velocity < parent.velocity)
             certificates.add(intersection, i);
@@ -173,7 +175,8 @@ struct KineticHeap {
     void fastforward(int timeToForward) {
         time += timeToForward;
 
-        while (certificates.min().value_or(std::numeric_limits<double>::infinity) < time) {
+        while (certificates.min().value_or(std::numeric_limits<double>::infinity()) < time) {
+            double time = certificates.min().value();
             size_t swap_i = certificates.min_ref_index().value();
             size_t parent = items.parent(swap_i); // must exist since the root node has no certificate
 
@@ -196,17 +199,29 @@ struct KineticHeap {
             // Up to 4 certificates need to be added.
             // The new node at index swap_i does not get a certificate since it just overtook its now-parent.
             if (parent != items.root())
-                maybeAddCertificate(parent);
+                maybeAddCertificate(parent, time);
             if (items.sibling(swap_i) < items.vec.size()) {
-                maybeAddCertificate(items.sibling(swap_i));
+                maybeAddCertificate(items.sibling(swap_i), time);
                 // Can't exist if sibling doesn't
                 if (items.left(swap_i) < items.vec.size()) {
-                    maybeAddCertificate(items.left(swap_i));
+                    maybeAddCertificate(items.left(swap_i), time);
                     // Can't exist if left child doesn't
                     if (items.right(swap_i) < items.vec.size())
-                        maybeAddCertificate(items.right(swap_i));
+                        maybeAddCertificate(items.right(swap_i), time);
                 }
             }
         }
     }
 };
+
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const KineticHeap<T>& heap) {
+    out << "Item: ";
+    for (int i = heap.items.root(); i < heap.items.vec.size(); ++i)
+        out << "(" << heap.items.vec[i].t.value << ", " << heap.items.ref_index(i) << "), ";
+    out << "\nCert: ";
+    for (int i = heap.certificates.root(); i < heap.certificates.vec.size(); ++i)
+        out << "(" << heap.certificates.vec[i].t << ", " << heap.certificates.ref_index(i) << "), ";
+    out << "\n";
+    return out;
+}
