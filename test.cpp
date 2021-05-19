@@ -12,42 +12,42 @@
 namespace test {
     std::map<std::string, void(*)()> tests {
         {"heap_new", [](){
-            MinHeap<int> heap;
+            MinHeap<int, true> heap(nullptr);
             assert1(heap.min() == std::nullopt);
         }},
 
         {"heap_root", [](){
-            MinHeap<int> heap;
-            heap.add(8);
+            MinHeap<int, true> heap(nullptr);
+            heap.add(8, 0);
             assert1(heap.min() == std::make_optional(8));
             assert1(heap.remove_min() == std::make_optional(8));
             assert1(heap.remove_min() == std::nullopt);
         }},
 
         {"heap_add_second", [](){
-            MinHeap<int> heap;
-            heap.add(8);
-            heap.add(5);
+            MinHeap<int, true> heap(nullptr);
+            heap.add(8, 0);
+            heap.add(5, 0);
             assert1(heap.remove_min() == std::make_optional(5));
             assert1(heap.remove_min() == std::make_optional(8));
             assert1(heap.remove_min() == std::nullopt);
         }},
 
         {"heap_add_multiple", [](){
-            MinHeap<int> heap;
+            MinHeap<int, true> heap(nullptr);
             for (int i : std::array<int, 10>{5, 10, 4, 3, 7, 2, 1, 8, 6, 9})
-                heap.add(i);
+                heap.add(i, 0);
             for (int i = 1; i <= 10; ++i)
                 assert2(heap.remove_min() == std::make_optional(i), "Failed to remove " + std::to_string(i));
             assert1(heap.remove_min() == std::nullopt);
         }},
 
         {"heap_add_after_remove", [](){
-            MinHeap<int> heap;
+            MinHeap<int, true> heap(nullptr);
             for (int i : std::array<int, 5>{5, 10, 4, 3, 7})
-                heap.add(i);
+                heap.add(i, 0);
             heap.remove_min();
-            heap.add(2);
+            heap.add(2, 0);
             for (int i : std::array<int, 5>{2, 4, 5, 7, 10})
                 assert2(heap.remove_min() == std::make_optional(i), "Failed to remove " + std::to_string(i));
             assert1(heap.remove_min() == std::nullopt);

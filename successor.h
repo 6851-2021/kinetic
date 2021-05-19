@@ -11,7 +11,7 @@ struct MovingObject {
     int *curtime;
     T value;
 
-    MovingObject(int ip, int v, int *t, T val) : initialPosition(ip), velocity(v), curtime(t), value(T) {}
+    MovingObject(int ip, int v, int *t, T val) : initialPosition(ip), velocity(v), curtime(t), value(val) {}
 
     double getIntersectionTime(const MovingObject &other) {
         return (other.initialPosition - initialPosition * 1.0) / (velocity - other.velocity);
@@ -24,7 +24,7 @@ struct MovingObject {
     bool operator<(const MovingObject &other) {
         return getPosition() < other.getPosition();
     }
-}
+};
 
 template<typename T>
 struct KineticSuccessor {
