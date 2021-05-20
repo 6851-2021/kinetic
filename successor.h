@@ -2,7 +2,8 @@
 #include <utility>
 #include <optional>
 #include <set>
-#include <map>
+#include <unordered_map>
+#include <iostream>
 
 template<typename T>
 struct MovingObject {
@@ -27,12 +28,24 @@ struct MovingObject {
         return (other.initialPosition - initialPosition * 1.0) / (velocity - other.velocity);
     }
 
-    double getPosition() const {
+    int getPosition() const {
         return initialPosition + velocity * (*curtime);
     }
 
     bool operator<(const MovingObject &other) const {
         return getPosition() < other.getPosition();
+    }
+
+    bool operator==(const MovingObject &other) const {
+        return initialPosition == other.initialPosition && velocity == other.velocity && value == other.value;
+    }
+
+};
+
+template<typename T>
+struct ObjectHasher {
+    int operator()(const MovingObject<T> &key) const {
+        return key.initialPosition * 31 + key.velocity;
     }
 };
 
@@ -40,7 +53,7 @@ template<typename T>
 struct KineticSuccessor {
     std::vector<MovingObject<T>> items;
     std::set<std::pair<double, std::pair<MovingObject<T>, MovingObject<T>>>> certificates;
-    std::map<MovingObject<T>, int> arrayLocations;
+    std::unordered_map<MovingObject<T>, int, ObjectHasher<T>> arrayLocations;
     int *time;
 
     std::pair<double, std::pair<MovingObject<T>, MovingObject<T>>> getCertificate(MovingObject<T> a, MovingObject<T> b) {
@@ -49,11 +62,12 @@ struct KineticSuccessor {
         if (b.velocity > a.velocity) { // they have already crossed each other
             intersectionTime = -std::numeric_limits<double>::infinity();
         }
-        return make_pair(intersectionTime, make_pair(a, b));
+        return {intersectionTime, {a, b}};
     }
 
     void insertCertificate(MovingObject<T> a, MovingObject<T> b) {
         auto certificate = getCertificate(a, b);
+        //std::cout << "inserting cert for " << a.value << " " << b.value << " time " << certificate.first << std::endl;
         if (certificate.first != -std::numeric_limits<double>::infinity()) {
             certificates.insert(certificate);
         }
@@ -64,10 +78,14 @@ struct KineticSuccessor {
         items = itemsUnsorted;
         time = t;
 
-        items = sort(items.begin(), items.end());
+        sort(items.begin(), items.end());
 
         for (int i = 0; i < items.size() - 1; i++) {
             insertCertificate(items[i], items[i + 1]);
+        }
+
+        for (int i = 0; i < items.size(); i++) {
+            arrayLocations[items[i]] = i;
         }
     }
 
@@ -82,39 +100,61 @@ struct KineticSuccessor {
     void fastforward(int timeToForward) {
         *time += timeToForward;
 
+        if (certificates.size() == 0) return;
+
         auto cur = *certificates.begin();
-        while (cur.first < time) {
+        while (cur.first < *time) {
             // swap them
             MovingObject<T> firstObject = cur.second.first;
             int firstLocation = arrayLocations[firstObject];
 
+
+            //std::cout << " at " << cur.first << " pos " << firstLocation << " " << firstObject.value << std::endl;
+
+            //for (auto i : items) {
+            //    std::cout << i.initialPosition << ' ' << i.velocity << ' ' << i.value << " | " ;
+            //}
+            //std::cout << std::endl;
             if (firstLocation > 0) {
-                certificates.erase(getCertificate(arrayLocations[firstLocation - 1], arrayLocations[firstLocation]));
+                certificates.erase(getCertificate(items[firstLocation - 1], items[firstLocation]));
             }
 
             if (firstLocation + 1 < items.size() - 1) {
-                certificates.erase(getCertificate(arrayLocations[firstLocation + 1], arrayLocations[firstLocation + 2]));
+                certificates.erase(getCertificate(items[firstLocation + 1], items[firstLocation + 2]));
             }
 
-            std::swap(arrayLocations[firstLocation], arrayLocations[firstLocation + 1]);
+            std::swap(items[firstLocation], items[firstLocation + 1]);
+
+            arrayLocations[items[firstLocation]] = firstLocation;
+            arrayLocations[items[firstLocation + 1]] = firstLocation + 1;
 
             if (firstLocation > 0) {
-                insertCertificate(arrayLocations[firstLocation - 1], arrayLocations[firstLocation]);
+                insertCertificate(items[firstLocation - 1], items[firstLocation]);
             }
 
             if (firstLocation + 1 < items.size() - 1) {
-                insertCertificate(arrayLocations[firstLocation + 1], arrayLocations[firstLocation + 2]);
+                insertCertificate(items[firstLocation + 1], items[firstLocation + 2]);
             }
 
             // don't reinsert our cross into the certificates set, because they can't cross back
 
+            //std::cout << "done" << std::endl;
             certificates.erase(certificates.begin());
 
+            //std::cout << "done" << std::endl;
+            //std::cout << "done" << std::endl;
+            //for (auto i : items) {
+            //    std::cout << i.initialPosition << ' ' << i.velocity << ' ' << i.value << " | " ;
+            //}
+            //std::cout << std::endl;
             if (certificates.size() > 0) {
+                //std::cout << "yes begin" << std::endl;
                 cur = *certificates.begin();
+                //std::cout << "acquired" << std::endl;
             } else {
                 break;
             }
+
 
         }
     }
