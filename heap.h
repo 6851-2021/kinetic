@@ -144,10 +144,10 @@ template<typename T>
 struct KineticHeap {
     MinHeap<MovingObject<T>, double> items;
     // Each node (except the root) has a certificate comparing it to its parent.
-    MinHeap<double, MovingObject<T>> certificates;
+    MinHeap<double, MovingObject<T> > certificates;
     int time;
 
-    KineticHeap(std::vector<MovingObject<T>> items_) : items(&certificates), certificates(&items), time(0) {
+    KineticHeap(std::vector<MovingObject<T> > items_) : items(&certificates), certificates(&items), time(0) {
         for (MovingObject<T> item_ : items_) {
             item_.curtime = &time;
             items.add(item_, 0);

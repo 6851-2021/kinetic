@@ -1,6 +1,6 @@
 #include <vector>
 #include <utility>
-#include <optional>
+#include <experimental/optional>
 #include <set>
 #include <map>
 
@@ -38,12 +38,12 @@ struct MovingObject {
 
 template<typename T>
 struct KineticSuccessor {
-    std::vector<MovingObject<T>> items;
-    std::set<std::pair<double, std::pair<MovingObject<T>, MovingObject<T>>>> certificates;
+    std::vector<MovingObject<T> > items;
+    std::set<std::pair<double, std::pair<MovingObject<T>, MovingObject<T> > > > certificates;
     std::map<MovingObject<T>, int> arrayLocations;
     int *time;
 
-    std::pair<double, std::pair<MovingObject<T>, MovingObject<T>>> getCertificate(MovingObject<T> a, MovingObject<T> b) {
+    std::pair<double, std::pair<MovingObject<T>, MovingObject<T> > > getCertificate(MovingObject<T> a, MovingObject<T> b) {
         double intersectionTime = a.getIntersectionTime(b);
 
         if (b.velocity > a.velocity) { // they have already crossed each other
@@ -60,7 +60,7 @@ struct KineticSuccessor {
     }
 
     // must have at least one element
-    KineticSuccessor(std::vector<MovingObject<T>> itemsUnsorted, int *t) {
+    KineticSuccessor(std::vector<MovingObject<T> > itemsUnsorted, int *t) {
         items = itemsUnsorted;
         time = t;
 
@@ -120,5 +120,5 @@ struct KineticSuccessor {
     }
 
 
-    
+
 };

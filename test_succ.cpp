@@ -1,23 +1,22 @@
 // The only purpose of this file is to test code.
 
-#include "heap.h"
+#include "successor.h"
 #include <map>
 #include <string>
 #include <stdexcept>
 #include <optional>
 #include <iostream>
-#include <time.h>
 #define assert1(cond) if (!(cond)) {throw std::logic_error("Assertion failed: " #cond);}
 #define assert2(cond, str) if (!(cond)) {throw std::logic_error(str);}
 
 namespace test {
     std::map<std::string, void(*)()> tests {
-        {"heap_new", [](){
+        {"successor_new", [](){
             MinHeap<int, int, true> heap(nullptr);
             assert1(heap.min() == std::nullopt);
         }},
 
-        {"heap_root", [](){
+        {"getCertificate", [](){
             MinHeap<int, int, true> heap(nullptr);
             heap.add(8, 0);
             assert1(heap.min() == std::make_optional(8));
