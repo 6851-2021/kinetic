@@ -6,7 +6,9 @@
 #include <stdexcept>
 #include <optional>
 #include <iostream>
-#include <time.h>
+#include <set>
+#include <random>
+#include <algorithm>
 #define assert1(cond) if (!(cond)) {throw std::logic_error("Assertion failed: " #cond);}
 #define assert2(cond, str) if (!(cond)) {throw std::logic_error(str);}
 
@@ -115,9 +117,54 @@ namespace test {
             assert1(heap.min().value().value == 10);
         }},
 
-        {"kinetic_successor_two_items", [](){
+        {"kinetic_successor_random", [](){
+            std::mt19937 t(818239390);
+            std::uniform_int_distribution<int> dis(-20000, 20000);
+
             std::vector<MovingObject<int>> vec;
-            assert1(true);
+
+            std::set<int> used;
+            int n = 4000;
+            int time = 0;
+            for (int i = 0; i < n; i++) {
+                int ip = dis(t);
+                int v = dis(t);
+
+                while (used.find(ip) != used.end()) {
+                    ip = dis(t);
+                    v = dis(t);
+                }
+                used.insert(ip);
+
+                //std::cout << "adding " << ip << " " << v << std::endl;
+                vec.push_back(MovingObject<int>(ip, v, &time, dis(t)));
+            }
+
+            KineticSuccessor succ(vec, &time);
+
+            std::uniform_int_distribution<int> dis2(0, 10000);
+
+            int t1 = dis2(t);
+            int t2 = dis2(t);
+
+            succ.fastforward(t1);
+            succ.fastforward(t2);
+
+            bool allEqual = false;
+
+            sort(vec.begin(), vec.end());
+
+            /*
+            for (auto i : succ.items) {
+                std::cout << i.getPosition() << ' ';
+            }
+            std::cout << std::endl;*/
+            for (int i = 0; i < vec.size(); i++) {
+                //std::cout << vec[i].getPosition() << ' ' << succ.items[i].getPosition() << std::endl;
+                if (vec[i].value != succ.items[i].value) {
+                    assert1(false);
+                }
+            }
         }}
     };
 }
