@@ -112,6 +112,11 @@ namespace test {
             assert1(heap.min().value().value == 0);
             heap.fastforward(1);
             assert1(heap.min().value().value == 10);
+        }},
+
+        {"kinetic_successor_two_items", [](){
+            std::vector<MovingObject<int>> vec;
+            assert1(true);
         }}
     };
 }

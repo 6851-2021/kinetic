@@ -43,10 +43,22 @@ struct KineticSuccessor {
     std::map<MovingObject<T>, int> arrayLocations;
     int *time;
 
-
     std::pair<double, std::pair<MovingObject<T>, MovingObject<T>>> getCertificate(MovingObject<T> a, MovingObject<T> b) {
-        return make_pair(a.getIntersectionTime(b), make_pair(a, b));
+        double intersectionTime = a.getIntersectionTime(b);
+
+        if (b.velocity > a.velocity) { // they have already crossed each other
+            intersectionTime = -std::numeric_limits<double>::infinity();
+        }
+        return make_pair(intersectionTime, make_pair(a, b));
     }
+
+    void insertCertificate(MovingObject<T> a, MovingObject<T> b) {
+        auto certificate = getCertificate(a, b);
+        if (certificate.first != -std::numeric_limits<double>::infinity()) {
+            certificates.insert(certificate);
+        }
+    }
+
     // must have at least one element
     KineticSuccessor(std::vector<MovingObject<T>> itemsUnsorted, int *t) {
         items = itemsUnsorted;
@@ -55,16 +67,7 @@ struct KineticSuccessor {
         items = sort(items.begin(), items.end());
 
         for (int i = 0; i < items.size() - 1; i++) {
-            /*
-
-            TODO
-
-            IMPORTANT: WHEN INSERTING CERTIFICATES CHECK TO SEE IF WE'VE ALREADY CROSSED
-            IF YES, DON'T INSERT
-            */
-
-            auto cert = getCertificate(items[i], items[i + 1]);
-            certificates.insert(getCertificate(items[i], items[i + 1]));
+            insertCertificate(items[i], items[i + 1]);
         }
     }
 
@@ -77,7 +80,7 @@ struct KineticSuccessor {
     }
 
     void fastforward(int timeToForward) {
-        time += timeToForward;
+        *time += timeToForward;
 
         auto cur = *certificates.begin();
         while (cur.first < time) {
@@ -95,20 +98,12 @@ struct KineticSuccessor {
 
             std::swap(arrayLocations[firstLocation], arrayLocations[firstLocation + 1]);
 
-            /*
-
-            TODO
-
-            IMPORTANT: WHEN INSERTING CERTIFICATES CHECK TO SEE IF WE'VE ALREADY CROSSED
-            IF YES, DON'T INSERT
-            */
-
             if (firstLocation > 0) {
-                certificates.insert(getCertificate(arrayLocations[firstLocation - 1], arrayLocations[firstLocation]));
+                insertCertificate(arrayLocations[firstLocation - 1], arrayLocations[firstLocation]);
             }
 
             if (firstLocation + 1 < items.size() - 1) {
-                certificates.insert(getCertificate(arrayLocations[firstLocation + 1], arrayLocations[firstLocation + 2]));
+                insertCertificate(arrayLocations[firstLocation + 1], arrayLocations[firstLocation + 2]);
             }
 
             // don't reinsert our cross into the certificates set, because they can't cross back
