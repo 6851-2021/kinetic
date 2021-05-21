@@ -11,9 +11,12 @@
 #define assert1(cond) if (!(cond)) {throw std::logic_error("Assertion failed: " #cond);}
 #define assert2(cond, str) if (!(cond)) {throw std::logic_error(str);}
 
+using namespace std;
+
 int main(int argc, char** argv) {
-    std::array<int, 2000> velocities {};
-    std::array<int, 2000> positions {};
+    const int num_particle = 2000;
+    std::array<int, num_particle> velocities {};
+    std::array<int, num_particle> positions {};
     // MinHeap<int, int, true> heap(nullptr);
     // for (int i : positions)
     //     heap.add(i, 0);
@@ -24,17 +27,12 @@ int main(int argc, char** argv) {
     for (int i = 0; i < velocities.size(); i++){
         velocities[i] = std::experimental::randint(-5000, 5000);
     }
-    KineticHeap<int> kinetic_heap(std::vector<MovingObject<int>>{
-                MovingObject(0, 2, 2),
-                MovingObject(2, 4, 3),
-                MovingObject(5, 0, 4),
-                MovingObject(6, -4, 5),
-                MovingObject(9, 0, 6),
-                MovingObject(10, 0, 7),
-                MovingObject(11, 0, 8),
-                MovingObject(16, -9, 9),
-                MovingObject(17, -9, 10),
-            });
+    std::vector<MovingObject<int>> moving_objs;
+    for (int k=0; k < num_particle; k++){
+        MovingObject<int> moving_obj = MovingObject(positions[k], velocities[k], std::experimental::randint(0, 100));
+        moving_objs.push_back(moving_obj);
+    }
+    KineticHeap<int> kinetic_heap(moving_objs);
 
 
     // Obtain the min values and running times for each time increment
