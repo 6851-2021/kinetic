@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
         query.push_back(moving_objs[idx]);
     }
     KineticSuccessor kinetic_successor(moving_objs, &time); // Initialize the kinetic DS
-    std::vector<MovingObject<int>> moving_obj_brute = moving_objs; // Record the particles for Brute-force method
+    // std::vector<MovingObject<int>> moving_obj_brute = moving_objs; // Record the particles for Brute-force method
     double time_sum = 0;
     double kinetic_time_sum = 0;
     // std::optional succ;
