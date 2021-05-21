@@ -14,7 +14,7 @@
 #define assert2(cond, str) if (!(cond)) {throw std::logic_error(str);}
 
 int main(int argc, char** argv) {
-    const int num_particle = 50000;
+    const int num_particle = 5000;
     int time = 0;
     std::array<int, num_particle> velocities {};
     std::array<int, num_particle> positions {};
@@ -87,5 +87,17 @@ int main(int argc, char** argv) {
     }
     std::cout << "Naive heap total time:" << time_sum << "ms" << std::endl;
     std::cout << "Kinetic heap total time:" << kinetic_time_sum << "ms" << std::endl;
+
+    std::cout << "Initial positions: " << std::endl;
+    for (int i = 0; i < positions.size(); i++){
+        std::cout << positions[i] << " ";
+        if (i % 10 == 0 && i != 0) std::cout << std::endl;
+    }
+
+    std::cout << "Velocities: " << std::endl;
+    for (int i = 0; i < velocities.size(); i++){
+        std::cout << velocities[i] << " ";
+        if (i % 10 == 0 && i != 0) std::cout << std::endl;
+    }
 
 }
