@@ -29,27 +29,35 @@ int main(int argc, char** argv) {
 
 
     // Obtain the min values and running times for each time increment
-    int time_inc = 50;
+    std::array<int, 5> time_incs {10, 100, 500, 1000, 10000};
+    double heap_time_sum = 0;
+    double kinetic_heap_time_sum = 0;
+    for (int j = 0; j < time_incs.size(); j++){
+        int time_inc = time_incs[j]; 
     // Update the position array for the naive heap
-    for (int k = 0; k < positions.size(); k++){
-        auto pos = std::get<k>(positions);
-        positions.at(k) = pos + time_inc * std::get<k>(velocities);
+        for (int k = 0; k < positions.size(); k++){
+            auto pos = positions[k];
+            positions.at(k) = pos + time_inc *velocities[k];
+        }
+        // Update the naive heap and the heap min with a running time
+        clock_t heap_start = clock();
+        MinHeap<int, int, true> heap(nullptr);
+        for (int i : positions)
+            heap.add(i, 0);
+        std::optional heap_min = heap.min();
+        clock_t heap_end= clock();
+        //std::cout << j << " [Naive heap]" << "min: "<< heap_min.value().value << " time: "<< (heap_end - heap_start) * 1.0 / CLOCKS_PER_SEC*1000 << "ms" << std::endl;
+        heap_time_sum += (heap_end - heap_start) * 1.0 / CLOCKS_PER_SEC*1000;
+        // Update the kinetic heap and the heap min with a running time
+        clock_t kinetic_heap_start = clock();
+        kinetic_heap.fastforward(time_inc);
+        int kinetic_heap_min = kinetic_heap.min().value().value;
+        clock_t kinetic_heap_end = clock();
+        //std::cout << j << " [Kinetic heap]" << "min: "<< kinetic_heap_min << " time: "<< (kinetic_heap_end - kinetic_heap_start) * 1.0 / CLOCKS_PER_SEC*1000 << "ms" << std::endl;
+        kinetic_heap_time_sum += (kinetic_heap_end - kinetic_heap_start) * 1.0 / CLOCKS_PER_SEC*1000;
     }
-    // Update the naive heap and the heap min with a running time
-    clock_t heap_start = clock();
-    MinHeap<int, int, true> heap(nullptr);
-    for (int i : positions)
-        heap.add(i, 0);
-    std::optional heap_min = heap.min();
-    clock_t heap_end= clock();
-    // Update the kinetic heap and the heap min with a running time
-    clock_t kinetic_heap_start = clock();
-    kinetic_heap.fastforward(time_inc);
-    int kinetic_heap_min = kinetic_heap.min().value().value;
-    clock_t kinetic_heap_end = clock();
-
-    std::cout << "Naive heap:" << (heap_end - heap_start) * 1.0 / CLOCKS_PER_SEC << "s" << std::endl;
-    std::cout << "Kinetic heap:" << (kinetic_heap_end - kinetic_heap_start) * 1.0 / CLOCKS_PER_SEC << "s" << std::endl;
+    std::cout << "Naive heap total time:" << heap_time_sum << "ms" << std::endl;
+    std::cout << "Kinetic heap total time:" << kinetic_heap_time_sum << "ms" << std::endl;
 
 
     // for (auto pair : test::tests) {
