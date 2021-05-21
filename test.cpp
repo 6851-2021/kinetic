@@ -117,6 +117,40 @@ namespace test {
             assert1(heap.min().value().value == 10);
         }},
 
+        {"kinetic_successor_parallel", [](){
+
+            int time = 0;   
+            std::vector<MovingObject<int>> vec;
+
+            vec.push_back(MovingObject<int>(1, 1, &time, 1));
+
+            vec.push_back(MovingObject<int>(1, 1, &time, 2));
+            vec.push_back(MovingObject<int>(1, 1, &time, 3));
+            vec.push_back(MovingObject<int>(2, 1, &time, 4));
+
+            vec.push_back(MovingObject<int>(-2, 2, &time, 5));
+            
+            KineticSuccessor succ(vec, &time);
+
+            succ.fastforward(1000);
+
+            bool allEqual = false;
+
+            sort(vec.begin(), vec.end());
+
+            /*
+            for (auto i : succ.items) {
+                std::cout << i.getPosition() << ' ';
+            }
+            std::cout << std::endl;*/
+            for (int i = 0; i < vec.size(); i++) {
+                std::cout << vec[i].getPosition() << ' ' << succ.items[i].getPosition() << std::endl;
+                if (vec[i].value != succ.items[i].value) {
+                    assert1(false);
+                }
+            }
+        }},
+
         {"kinetic_successor_random", [](){
             std::mt19937 t(818239390);
             std::uniform_int_distribution<int> dis(-20000, 20000);

@@ -33,6 +33,9 @@ struct MovingObject {
     }
 
     bool operator<(const MovingObject &other) const {
+        if (getPosition() == other.getPosition()) {
+            return value < other.value;
+        }
         return getPosition() < other.getPosition();
     }
 
@@ -69,7 +72,12 @@ struct KineticSuccessor {
         auto certificate = getCertificate(a, b);
         //std::cout << "inserting cert for " << a.value << " " << b.value << " time " << certificate.first << std::endl;
         if (certificate.first != -std::numeric_limits<double>::infinity()) {
+
+            //std::cout << " certs size " << certificates.size() << " item " << (*certificates.begin()).second.first.value << ' ' << (*certificates.begin()).second.second.value <<  std::endl;
+            //std::cout << "inserted " << std::endl;
             certificates.insert(certificate);
+            //std::cout << " certs size " << certificates.size() << " item " << (*certificates.begin()).second.first.value << ' ' << (*certificates.begin()).second.second.value <<  std::endl;
+            
         }
     }
 
@@ -97,20 +105,28 @@ struct KineticSuccessor {
         return (findLocation(m) + 1 < items.size() ? std::make_optional(items[findLocation(m) + 1]) : std::nullopt);
     }
 
+    //int counter = 0;
+
     void fastforward(int timeToForward) {
         *time += timeToForward;
 
         if (certificates.size() == 0) return;
 
         auto cur = *certificates.begin();
+        auto curit = certificates.begin();
         while (cur.first < *time) {
             // swap them
             MovingObject<T> firstObject = cur.second.first;
             int firstLocation = arrayLocations[firstObject];
 
 
-            //std::cout << " at " << cur.first << " pos " << firstLocation << " " << firstObject.value << std::endl;
+            certificates.erase(curit);
 
+            //counter++;
+
+            //if (counter % 1000000 == 0) std::cout << " at " << cur.first << " pos " << firstLocation << " " << firstObject.value << " certs size " << certificates.size() << std::endl;
+
+            //std::cout << " certs size " << certificates.size() <<  std::endl;
             //for (auto i : items) {
             //    std::cout << i.initialPosition << ' ' << i.velocity << ' ' << i.value << " | " ;
             //}
@@ -123,11 +139,15 @@ struct KineticSuccessor {
                 certificates.erase(getCertificate(items[firstLocation + 1], items[firstLocation + 2]));
             }
 
+            //auto tmp = items[firstLocation];
+            //items[firstLocation] = items[firstLocation + 1];
+            //items[firstLocation + 1] = tmp;
             std::swap(items[firstLocation], items[firstLocation + 1]);
 
-            arrayLocations[items[firstLocation]] = firstLocation;
-            arrayLocations[items[firstLocation + 1]] = firstLocation + 1;
+            arrayLocations[items[firstLocation]]--;
+            arrayLocations[items[firstLocation + 1]]++;
 
+            //std::cout << " certs size " << certificates.size() <<  std::endl;
             if (firstLocation > 0) {
                 insertCertificate(items[firstLocation - 1], items[firstLocation]);
             }
@@ -136,10 +156,12 @@ struct KineticSuccessor {
                 insertCertificate(items[firstLocation + 1], items[firstLocation + 2]);
             }
 
+
+            //std::cout << " certs size " << certificates.size() <<  std::endl;
+
             // don't reinsert our cross into the certificates set, because they can't cross back
 
             //std::cout << "done" << std::endl;
-            certificates.erase(certificates.begin());
 
             //std::cout << "done" << std::endl;
             //std::cout << "done" << std::endl;
@@ -147,10 +169,12 @@ struct KineticSuccessor {
             //    std::cout << i.initialPosition << ' ' << i.velocity << ' ' << i.value << " | " ;
             //}
             //std::cout << std::endl;
+            //std::cout << " certs size " << certificates.size() <<  std::endl;
             if (certificates.size() > 0) {
                 //std::cout << "yes begin" << std::endl;
                 cur = *certificates.begin();
-                //std::cout << "acquired" << std::endl;
+                curit = certificates.begin();
+                //std::cout << "acquired " << cur.first << std::endl;
             } else {
                 break;
             }
