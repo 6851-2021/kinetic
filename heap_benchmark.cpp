@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <optional>
 #include <iostream>
+#include <time.h>
 #define assert1(cond) if (!(cond)) {throw std::logic_error("Assertion failed: " #cond);}
 #define assert2(cond, str) if (!(cond)) {throw std::logic_error(str);}
 
