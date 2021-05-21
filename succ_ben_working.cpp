@@ -57,10 +57,10 @@ int main(int argc, char** argv) {
         int time_inc = time_incs[j]; 
     // Update the position array for the Brute-force method
         clock_t start = clock();
-        for (int k = 0; k < moving_obj_brute.size(); k++){
-            *(moving_obj_brute[k].curtime) = *(moving_obj_brute[k].curtime) + time_inc;
-        }
-        sort(moving_obj_brute.begin(), moving_obj_brute.end());
+        // for (int k = 0; k < moving_obj_brute.size(); k++){
+        //     *(moving_obj_brute[k].curtime) = *(moving_obj_brute[k].curtime) + time_inc;
+        // }
+        sort(moving_objs.begin(), moving_objs.end());
         // for (int k = 0; k < moving_obj_brute.size(); k++){
         //     if (moving_obj_brute[k].value == query[j].value)
         //     std::optional    succ = k < moving_obj_brute.size()-1 ? std::make_optional(moving_obj_brute[k+1].value) : std::nullopt; 
@@ -69,9 +69,9 @@ int main(int argc, char** argv) {
         // std::cout << j << " [Naive]" << "succ: "<< succ.value << " time: "<< (end - start) * 1.0 / CLOCKS_PER_SEC*1000 << "ms" << std::endl;
         std::cout << j << " [Naive]" << " time: "<< (end - start) * 1.0 / CLOCKS_PER_SEC*1000 << "ms" << std::endl;
         time_sum += (end - start) * 1.0 / CLOCKS_PER_SEC*1000;
-        time_sum += (end - start) * 1.0 / CLOCKS_PER_SEC*1000;
         // Update the kinetic heap and the heap min with a running time
         int time = 0;
+        std::cout << "cc"<< std::endl;
         KineticSuccessor kinetic_successor(moving_objs, &time);
         clock_t kinetic_start = clock();
         kinetic_successor.fastforward(time_inc);

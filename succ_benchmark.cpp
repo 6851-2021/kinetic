@@ -15,6 +15,7 @@
 
 int main(int argc, char** argv) {
     const int num_particle = 50000;
+    int time = 0;
     std::array<int, num_particle> velocities {};
     std::array<int, num_particle> positions {};
     std::array<int, num_particle> values {};
@@ -35,7 +36,7 @@ int main(int argc, char** argv) {
 
     std::vector<MovingObject<int>> moving_objs;
     for (int k=0; k < num_particle; k++){
-        MovingObject<int> moving_obj = MovingObject(positions[k], velocities[k], values[k]);
+        MovingObject<int> moving_obj = MovingObject(positions[k], velocities[k], &time, values[k]);
         moving_objs.push_back(moving_obj);
     }
 
@@ -71,7 +72,7 @@ int main(int argc, char** argv) {
         time_sum += (end - start) * 1.0 / CLOCKS_PER_SEC*1000;
         time_sum += (end - start) * 1.0 / CLOCKS_PER_SEC*1000;
         // Update the kinetic heap and the heap min with a running time
-        int time = 0;
+    
         KineticSuccessor kinetic_successor(moving_objs, &time);
         clock_t kinetic_start = clock();
         kinetic_successor.fastforward(time_inc);
