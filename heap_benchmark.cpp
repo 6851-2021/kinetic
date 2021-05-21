@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
         positions[i] = std::experimental::randint(-5000, 5000);
     }
     for (int i = 0; i < velocities.size(); i++){
-        velocities[i] = std::experimental::randint(-5000, 5000);
+        velocities[i] = std::experimental::randint(-1000, 1000);
     }
     std::vector<MovingObject<int>> moving_objs;
     for (int k=0; k < num_particle; k++){
@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
     // Update the position array for the naive heap
         for (int k = 0; k < positions.size(); k++){
             auto pos = positions[k];
-            positions.at(k) = pos + time_inc *velocities[k];
+            positions.at(k) = pos + time_inc * velocities[k];
         }
         // Update the naive heap and the heap min with a running time
         clock_t heap_start = clock();
@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
         // Update the kinetic heap and the heap min with a running time
         clock_t kinetic_heap_start = clock();
         kinetic_heap.fastforward(time_inc);
-        int kinetic_heap_min = kinetic_heap.min().value().value;
+        int kinetic_heap_min = kinetic_heap.min().value().getPosition();
         clock_t kinetic_heap_end = clock();
         std::cout << j << " [Kinetic heap]" << "min: "<< kinetic_heap_min << " time: "<< (kinetic_heap_end - kinetic_heap_start) * 1.0 / CLOCKS_PER_SEC*1000 << "ms" << std::endl;
         kinetic_heap_time_sum += (kinetic_heap_end - kinetic_heap_start) * 1.0 / CLOCKS_PER_SEC*1000;
@@ -66,6 +66,17 @@ int main(int argc, char** argv) {
     std::cout << "Naive heap total time:" << heap_time_sum << "ms" << std::endl;
     std::cout << "Kinetic heap total time:" << kinetic_heap_time_sum << "ms" << std::endl;
 
+    std::cout << "Initial positions: " << endl;
+    for (int i = 0; i < positions.size(); i++){
+        std::cout << positions[i] << " ";
+        if (i % 10 == 0 && i != 0) std::cout << endl;
+    }
+
+    std::cout << "Velocities: " << endl;
+    for (int i = 0; i < velocities.size(); i++){
+        std::cout << velocities[i] << " ";
+        if (i % 10 == 0 && i != 0) std::cout << endl;
+    }
 
     // for (auto pair : test::tests) {
     //     //if (pair.first == "kinetic_heap_total_certificate_invalidation") {
