@@ -61,7 +61,9 @@ int main(int argc, char** argv) {
         
         // Update the kinetic heap and the heap min with a running time
         clock_t kinetic_start = clock();
+        std::cout << "REE" << std::endl;
         kinetic_successor.fastforward(time_inc);
+        std::cout << "dead " << std::endl;
         // std::optional kinetic_succ = kinetic_successor.findSuccessor(query[j]);
         clock_t kinetic_end = clock();
         // std::cout << j << " [Kinetic]" << "succ: "<< kinetic_succ.value().value << " time: "<< (kinetic_end - kinetic_start) * 1.0 / CLOCKS_PER_SEC*1000 << "ms" << std::endl;
