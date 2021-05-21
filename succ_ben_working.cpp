@@ -15,6 +15,7 @@
 
 int main(int argc, char** argv) {
     const int num_particle = 50000;
+    int time = 0;
     std::array<int, num_particle> velocities {};
     std::array<int, num_particle> positions {};
     std::array<int, num_particle> values {};
@@ -35,7 +36,7 @@ int main(int argc, char** argv) {
 
     std::vector<MovingObject<int>> moving_objs;
     for (int k=0; k < num_particle; k++){
-        MovingObject<int> moving_obj = MovingObject(positions[k], velocities[k], values[k]);
+        MovingObject<int> moving_obj = MovingObject(positions[k], velocities[k], &time, values[k]);
         moving_objs.push_back(moving_obj);
     }
 
@@ -49,6 +50,7 @@ int main(int argc, char** argv) {
         int idx = std::experimental::randint(0, (int)moving_objs.size());
         query.push_back(moving_objs[idx]);
     }
+    KineticSuccessor kinetic_successor(moving_objs, &time); // Initialize the kinetic DS
     std::vector<MovingObject<int>> moving_obj_brute = moving_objs; // Record the particles for Brute-force method
     double time_sum = 0;
     double kinetic_time_sum = 0;
@@ -56,10 +58,21 @@ int main(int argc, char** argv) {
     for (int j = 0; j < time_incs.size(); j++){
         int time_inc = time_incs[j]; 
     // Update the position array for the Brute-force method
+        
+        // Update the kinetic heap and the heap min with a running time
+        clock_t kinetic_start = clock();
+        kinetic_successor.fastforward(time_inc);
+        // std::optional kinetic_succ = kinetic_successor.findSuccessor(query[j]);
+        clock_t kinetic_end = clock();
+        // std::cout << j << " [Kinetic]" << "succ: "<< kinetic_succ.value().value << " time: "<< (kinetic_end - kinetic_start) * 1.0 / CLOCKS_PER_SEC*1000 << "ms" << std::endl;
+        std::cout << j << " [Kinetic]" << " time: "<< (kinetic_end - kinetic_start) * 1.0 / CLOCKS_PER_SEC*1000 << "ms" << std::endl;
+        kinetic_time_sum += (kinetic_end - kinetic_start) * 1.0 / CLOCKS_PER_SEC*1000;
+
         clock_t start = clock();
         // for (int k = 0; k < moving_obj_brute.size(); k++){
         //     *(moving_obj_brute[k].curtime) = *(moving_obj_brute[k].curtime) + time_inc;
         // }
+        std::cout << "cc"<< std::endl;
         sort(moving_objs.begin(), moving_objs.end());
         // for (int k = 0; k < moving_obj_brute.size(); k++){
         //     if (moving_obj_brute[k].value == query[j].value)
@@ -69,17 +82,6 @@ int main(int argc, char** argv) {
         // std::cout << j << " [Naive]" << "succ: "<< succ.value << " time: "<< (end - start) * 1.0 / CLOCKS_PER_SEC*1000 << "ms" << std::endl;
         std::cout << j << " [Naive]" << " time: "<< (end - start) * 1.0 / CLOCKS_PER_SEC*1000 << "ms" << std::endl;
         time_sum += (end - start) * 1.0 / CLOCKS_PER_SEC*1000;
-        // Update the kinetic heap and the heap min with a running time
-        int time = 0;
-        std::cout << "cc"<< std::endl;
-        KineticSuccessor kinetic_successor(moving_objs, &time);
-        clock_t kinetic_start = clock();
-        kinetic_successor.fastforward(time_inc);
-        // std::optional kinetic_succ = kinetic_successor.findSuccessor(query[j]);
-        clock_t kinetic_end = clock();
-        // std::cout << j << " [Kinetic]" << "succ: "<< kinetic_succ.value().value << " time: "<< (kinetic_end - kinetic_start) * 1.0 / CLOCKS_PER_SEC*1000 << "ms" << std::endl;
-        std::cout << j << " [Kinetic]" << " time: "<< (kinetic_end - kinetic_start) * 1.0 / CLOCKS_PER_SEC*1000 << "ms" << std::endl;
-        kinetic_time_sum += (kinetic_end - kinetic_start) * 1.0 / CLOCKS_PER_SEC*1000;
     }
     std::cout << "Naive heap total time:" << time_sum << "ms" << std::endl;
     std::cout << "Kinetic heap total time:" << kinetic_time_sum << "ms" << std::endl;
