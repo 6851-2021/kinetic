@@ -6,15 +6,24 @@
 #include <stdexcept>
 #include <optional>
 #include <iostream>
+#include <time.h>
+#include <experimental/random>
 #define assert1(cond) if (!(cond)) {throw std::logic_error("Assertion failed: " #cond);}
 #define assert2(cond, str) if (!(cond)) {throw std::logic_error(str);}
 
 int main(int argc, char** argv) {
-    std::array<int, 9> velocities {2, 4, 0, -4, 0, 0, 0, -9, -9};
-    std::array<int, 9> positions {0, 2, 5, 6, 9, 10, 11, 16, 17};
+    std::array<int, 2000> velocities {};
+    std::array<int, 2000> positions {};
     // MinHeap<int, int, true> heap(nullptr);
     // for (int i : positions)
     //     heap.add(i, 0);
+    // Randomly generate the initial positions and velocities (integers)
+    for (int i = 0; i < positions.size(); i++){
+        positions[i] = std::experimental::randint(-5000, 5000);
+    }
+    for (int i = 0; i < velocities.size(); i++){
+        velocities[i] = std::experimental::randint(-5000, 5000);
+    }
     KineticHeap<int> kinetic_heap(std::vector<MovingObject<int>>{
                 MovingObject(0, 2, 2),
                 MovingObject(2, 4, 3),
