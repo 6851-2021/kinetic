@@ -4,6 +4,7 @@
 #include <set>
 #include <unordered_map>
 #include <iostream>
+#include <algorithm>
 
 template<typename T>
 struct MovingObject {
